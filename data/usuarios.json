@@ -1,0 +1,39 @@
+[
+
+    {
+  
+      "id": "usr001",
+  
+      "username": "rmirellaa",
+  
+      "password": "1234",
+  
+      "nomeCompleto": "Raiany Mirella"
+  
+    },
+  
+    {
+  
+      "id": "usr002",
+  
+      "username": "vitinho",
+  
+      "password": "abcd",
+  
+      "nomeCompleto": "Vitor Hugo"
+  
+    },
+  
+    {
+  
+      "id": "usr003",
+  
+      "username": "irineu",
+  
+      "password": "890",
+  
+      "nomeCompleto": "Irineu Francisco"
+  
+    }
+  
+  ]
