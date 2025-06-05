@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import usuariosCadastrados from '../../data/usuarios.json'; 
-
+import { useNavigation } from '@react-navigation/native';
 
 interface Usuario {
   id: string;
@@ -25,7 +25,6 @@ interface LoginState {
   loggedInUser?: Usuario;
 }
 
-
 const LOGIN_STATE_FILENAME = 'login_session_state.json';
 const loginStateFilePath = `${FileSystem.documentDirectory}${LOGIN_STATE_FILENAME}`;
 
@@ -36,7 +35,7 @@ export default function App() {
   const [loggedInUserData, setLoggedInUserData] = useState<Usuario | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loginError, setLoginError] = useState('');
-
+  const navigation = useNavigation();
 
   const saveLoginState = async (loggedIn: boolean, user?: Usuario) => {
     try {
@@ -46,7 +45,6 @@ export default function App() {
       console.error('Erro ao salvar estado de login:', error);
     }
   };
-
 
   useEffect(() => {
     const loadLoginState = async () => {
@@ -72,7 +70,6 @@ export default function App() {
     loadLoginState();
   }, []);
 
- 
   const handleLogin = () => {
     setLoginError('');
     const userFound = (usuariosCadastrados as Usuario[]).find(
@@ -84,6 +81,11 @@ export default function App() {
       saveLoginState(true, userFound);
       setUsernameInput('');
       setPasswordInput('');
+      // Redireciona para a Home
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
     } else {
       setLoginError('Usuário ou senha inválidos!');
       setIsLoggedIn(false);
@@ -92,7 +94,6 @@ export default function App() {
     }
   };
 
-  
   const handleLogout = () => {
     setIsLoggedIn(false);
     setLoggedInUserData(null);
@@ -100,7 +101,6 @@ export default function App() {
     setLoginError('');
   };
 
-  
   if (isLoading) {
     return (
       <SafeAreaView style={styles.containerCentered}>
@@ -110,7 +110,6 @@ export default function App() {
     );
   }
 
- 
   if (!isLoggedIn) {
     return (
       <SafeAreaView style={styles.container}>
@@ -140,22 +139,17 @@ export default function App() {
     );
   }
 
-// O QUE IRÁ APARECER QUANDO O USUÁRIO ESTIVER LOGADO
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.content}>
-        <Text style={styles.title}>Bem-vindo(a)!</Text>
-        {loggedInUserData && (
-          <Text style={styles.welcomeText}>Olá, {loggedInUserData.nomeCompleto}!</Text>
-        )}
-        <Text style={styles.infoText}>Você acessou o sistema com sucesso.</Text>
-        <View style={styles.buttonContainer}>
-          <Button title="Logout" onPress={handleLogout} color="#dc3545" />
-        </View>
-      </View>
-    </SafeAreaView>
-  );
+  // Se já estiver logado, pode redirecionar para Home automaticamente (opcional)
+  // useEffect(() => {
+  //   if (isLoggedIn) {
+  //     navigation.reset({
+  //       index: 0,
+  //       routes: [{ name: 'Home' }],
+  //     });
+  //   }
+  // }, [isLoggedIn]);
+
+  return null;
 }
 
 const styles = StyleSheet.create({
@@ -197,7 +191,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 8,
     overflow: 'hidden',
-   
   },
   errorText: {
     color: 'red',
