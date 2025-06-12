@@ -140,22 +140,7 @@ export default function App() {
     );
   }
 
-// O QUE IRÁ APARECER QUANDO O USUÁRIO ESTIVER LOGADO
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.content}>
-        <Text style={styles.title}>Bem-vindo(a)!</Text>
-        {loggedInUserData && (
-          <Text style={styles.welcomeText}>Olá, {loggedInUserData.nomeCompleto}!</Text>
-        )}
-        <Text style={styles.infoText}>Você acessou o sistema com sucesso.</Text>
-        <View style={styles.buttonContainer}>
-          <Button title="Logout" onPress={handleLogout} color="#dc3545" />
-        </View>
-      </View>
-    </SafeAreaView>
-  );
+
 }
 
 const styles = StyleSheet.create({
@@ -180,6 +165,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 30,
     color: '#333',
+    
   },
   input: {
     height: 50,
@@ -217,3 +203,6 @@ const styles = StyleSheet.create({
     color: '#555',
   },
 });
+
+
+
