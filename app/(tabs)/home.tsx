@@ -1,7 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Dimensions,
+  ImageBackground,
+} from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
+
+const backgroundImage = require('../../assets/images/fundolivraria.png');
 
 interface Livro {
   id: string;
@@ -9,6 +22,7 @@ interface Livro {
   authors?: string[];
   thumbnail?: string;
   publishedDate?: string;
+  description?: string;
 }
 
 const assuntos = [
@@ -23,12 +37,15 @@ export default function Home() {
   const [livros, setLivros] = useState<Livro[]>([]);
   const [loading, setLoading] = useState(true);
   const [assunto, setAssunto] = useState('ficção científica');
+  const [favoritos, setFavoritos] = useState<Livro[]>([]);
   const navigation = useNavigation();
 
   const buscarLivros = async (tema: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(tema)}`);
+      const response = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(tema)}`
+      );
       const data = await response.json();
       const livrosFormatados: Livro[] = (data.items || []).map((item: any) => ({
         id: item.id,
@@ -36,6 +53,7 @@ export default function Home() {
         authors: item.volumeInfo.authors,
         thumbnail: item.volumeInfo.imageLinks?.thumbnail,
         publishedDate: item.volumeInfo.publishedDate,
+        description: item.volumeInfo.description,
       }));
       setLivros(livrosFormatados);
     } catch (error) {
@@ -49,39 +67,91 @@ export default function Home() {
     buscarLivros(assunto);
   }, [assunto]);
 
+  const toggleFavorito = (livro: Livro) => {
+    setFavoritos((prev) => {
+      if (prev.some(f => f.id === livro.id)) {
+        return prev.filter(f => f.id !== livro.id);
+      }
+      return [...prev, livro];
+    });
+  };
+
   if (loading) {
     return (
-      <LinearGradient colors={['#e0eafc', '#cfdef3']} style={styles.gradient}>
+      <ImageBackground
+        source={backgroundImage}
+        resizeMode="cover"
+        style={styles.background}
+      >
+        <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#007bff" />
         </View>
-      </LinearGradient>
+      </ImageBackground>
     );
   }
 
   return (
-    <LinearGradient colors={['#e0eafc', '#cfdef3']} style={styles.gradient}>
+    <ImageBackground
+      source={backgroundImage}
+      resizeMode="cover"
+      style={styles.background}
+    >
+      <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />
       <View style={styles.container}>
-        <Text style={styles.titulo}>Livros por Assunto</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.buscaArea} contentContainerStyle={styles.buscaContent}>
-          {assuntos.map(a => (
-            <TouchableOpacity
-              key={a.value}
-              style={[styles.botao, assunto === a.value && styles.botaoAtivo]}
-              onPress={() => setAssunto(a.value)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.textoBotao}>{a.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View style={styles.topBar}>
+          <Text style={styles.titulo}>Livros por Assunto</Text>
+          <TouchableOpacity
+            style={styles.favButton}
+            onPress={() => navigation.navigate('favoritos', { favoritos })}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.favButtonText}>★ Ver Favoritos</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ width: '100%', alignItems: 'center', marginBottom: 10 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.buscaContent}
+            style={styles.buscaArea}
+          >
+            {assuntos.map((a, idx) => (
+              <TouchableOpacity
+                key={a.value}
+                style={[
+                  styles.botaoCategoria,
+                  assunto === a.value && styles.botaoCategoriaAtivo,
+                  idx === assuntos.length - 1 && { marginRight: 0 },
+                ]}
+                onPress={() => setAssunto(a.value)}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.textoBotaoCategoria}>{a.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
         <FlatList
           data={livros}
           keyExtractor={item => item.id}
-          ListEmptyComponent={<Text style={styles.nenhum}>Nenhum livro encontrado.</Text>}
+          ListEmptyComponent={
+            <Text style={styles.nenhum}>Nenhum livro encontrado.</Text>
+          }
           contentContainerStyle={styles.lista}
           renderItem={({ item }) => (
             <View style={styles.card}>
+              <TouchableOpacity
+                onPress={() => toggleFavorito(item)}
+                style={styles.starButton}
+              >
+                <Text style={{
+                  fontSize: 26,
+                  color: favoritos.some(f => f.id === item.id) ? '#ffd700' : '#bbb'
+                }}>
+                  ★
+                </Text>
+              </TouchableOpacity>
               <Image
                 source={
                   item.thumbnail
@@ -111,15 +181,22 @@ export default function Home() {
           )}
         />
       </View>
-    </LinearGradient>
+    </ImageBackground>
   );
 }
 
 const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  gradient: {
+  background: {
     flex: 1,
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   container: {
     flex: 1,
@@ -127,44 +204,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  titulo: {
-    fontSize: 28,
+  topBar: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    marginTop: 10,
+    paddingHorizontal: 8,
+  },
+  favButton: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  favButtonText: {
+    color: '#a259f7',
     fontWeight: 'bold',
-    marginBottom: 18,
-    textAlign: 'center',
-    color: '#222',
-    letterSpacing: 1,
+    fontSize: 16,
   },
   buscaArea: {
     flexDirection: 'row',
     marginBottom: 20,
     alignSelf: 'center',
-    maxHeight: 50,
+    maxHeight: 60,
   },
   buscaContent: {
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 4,
   },
-  botao: {
-    marginRight: 10,
-    backgroundColor: '#007bff',
-    borderRadius: 20,
+  botaoCategoria: {
+    marginRight: 12,
+    backgroundColor: '#6c47ff',
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    height: 40,
-    elevation: 3,
-    shadowColor: '#007bff',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    paddingHorizontal: 22,
+    height: 44,
+    elevation: 4,
+    shadowColor: '#6c47ff',
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    borderWidth: 2,
+    borderColor: 'transparent',
+    marginVertical: 4,
   },
-  botaoAtivo: {
-    backgroundColor: '#0056b3',
-    elevation: 6,
-    shadowColor: '#0056b3',
+  botaoCategoriaAtivo: {
+    backgroundColor: '#a259f7',
+    borderColor: '#fff',
+    borderWidth: 2,
+    elevation: 7,
+    shadowColor: '#a259f7',
   },
-  textoBotao: {
+  textoBotaoCategoria: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
@@ -187,6 +289,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
+    position: 'relative',
+  },
+  starButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 2,
   },
   thumbnail: {
     width: 90,
@@ -224,7 +333,7 @@ const styles = StyleSheet.create({
   },
   botaoDetalhes: {
     marginTop: 10,
-    backgroundColor: '#00b894',
+    backgroundColor: '#6c47ff',
     borderRadius: 16,
     paddingVertical: 8,
     paddingHorizontal: 18,

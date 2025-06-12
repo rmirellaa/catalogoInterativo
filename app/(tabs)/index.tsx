@@ -1,212 +1,168 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  StyleSheet,
-  Text,
   View,
+  Text,
   TextInput,
-  Button,
-  SafeAreaView,
-  ActivityIndicator,
-  StatusBar,
+  Pressable,
+  ImageBackground,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import * as FileSystem from 'expo-file-system';
-import usuariosCadastrados from '../../data/usuarios.json'; 
+import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
 
-interface Usuario {
-  id: string;
-  username: string;
-  password: string;
-  nomeCompleto: string;
-}
+// Importe o JSON de usuários
+import usuarios from '../../data/usuarios.json';
 
-interface LoginState {
-  isLoggedIn: boolean;
-  loggedInUser?: Usuario;
-}
+const backgroundImage = require('../../assets/images/fundolivraria.png');
 
-const LOGIN_STATE_FILENAME = 'login_session_state.json';
-const loginStateFilePath = `${FileSystem.documentDirectory}${LOGIN_STATE_FILENAME}`;
-
-export default function App() {
-  const [usernameInput, setUsernameInput] = useState('');
-  const [passwordInput, setPasswordInput] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loggedInUserData, setLoggedInUserData] = useState<Usuario | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loginError, setLoginError] = useState('');
+export default function LoginScreen() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [erro, setErro] = useState('');
   const navigation = useNavigation();
 
-  const saveLoginState = async (loggedIn: boolean, user?: Usuario) => {
-    try {
-      const stateToSave: LoginState = { isLoggedIn: loggedIn, loggedInUser: user };
-      await FileSystem.writeAsStringAsync(loginStateFilePath, JSON.stringify(stateToSave));
-    } catch (error) {
-      console.error('Erro ao salvar estado de login:', error);
-    }
-  };
-
-  useEffect(() => {
-    const loadLoginState = async () => {
-      setIsLoading(true);
-      try {
-        const fileInfo = await FileSystem.getInfoAsync(loginStateFilePath);
-        if (fileInfo.exists) {
-          const storedStateString = await FileSystem.readAsStringAsync(loginStateFilePath);
-          const loadedState: LoginState = JSON.parse(storedStateString);
-          setIsLoggedIn(loadedState.isLoggedIn);
-          if (loadedState.isLoggedIn && loadedState.loggedInUser) {
-            setLoggedInUserData(loadedState.loggedInUser);
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao carregar estado de login:', error);
-        setIsLoggedIn(false);
-        setLoggedInUserData(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadLoginState();
-  }, []);
-
   const handleLogin = () => {
-    setLoginError('');
-    const userFound = (usuariosCadastrados as Usuario[]).find(
-      (user) => user.username === usernameInput.trim() && user.password === passwordInput
+    // Procura usuário no JSON
+    const usuarioEncontrado = usuarios.find(
+      (u) => u.username === username && u.password === password
     );
-    if (userFound) {
-      setIsLoggedIn(true);
-      setLoggedInUserData(userFound);
-      saveLoginState(true, userFound);
-      setUsernameInput('');
-      setPasswordInput('');
-      // Redireciona para a Home
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
-      });
+    if (usuarioEncontrado) {
+      setErro('');
+      navigation.navigate('home');
     } else {
-      setLoginError('Usuário ou senha inválidos!');
-      setIsLoggedIn(false);
-      setLoggedInUserData(null);
-      saveLoginState(false);
+      setErro('Usuário ou senha inválidos!');
     }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setLoggedInUserData(null);
-    saveLoginState(false);
-    setLoginError('');
-  };
-
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.containerCentered}>
-        <ActivityIndicator size="large" color="#007bff" />
-        <Text>Verificando sessão...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
-        <View style={styles.content}>
-          <Text style={styles.title}>Login</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Usuário"
-            value={usernameInput}
-            onChangeText={setUsernameInput}
-            autoCapitalize="none"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Senha"
-            value={passwordInput}
-            onChangeText={setPasswordInput}
-            secureTextEntry
-          />
-          {loginError ? <Text style={styles.errorText}>{loginError}</Text> : null}
-          <View style={styles.buttonContainer}>
-            <Button title="Entrar" onPress={handleLogin} color="#ff0000" />
-          </View>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Se já estiver logado, pode redirecionar para Home automaticamente (opcional)
-  // useEffect(() => {
-  //   if (isLoggedIn) {
-  //     navigation.reset({
-  //       index: 0,
-  //       routes: [{ name: 'Home' }],
-  //     });
-  //   }
-  // }, [isLoggedIn]);
-
-  return null;
+  return (
+    <View style={styles.container}>
+      <ImageBackground
+        source={backgroundImage}
+        resizeMode="cover"
+        style={styles.background}
+      >
+        <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.overlay}
+        >
+          <BlurView intensity={70} tint="light" style={styles.loginBox}>
+            <Text style={styles.title}>Livraria Digital</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Usuário"
+              placeholderTextColor="#333"
+              value={username}
+              onChangeText={setUsername}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Senha"
+              placeholderTextColor="#333"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            {erro ? <Text style={styles.erro}>{erro}</Text> : null}
+            <Pressable style={styles.button} onPress={handleLogin}>
+              <Text style={styles.buttonText}>ENTRAR</Text>
+            </Pressable>
+            <View style={styles.cadastroContainer}>
+              <Text style={styles.cadastroText}>Não tem conta?</Text>
+              <Pressable onPress={() => navigation.navigate('cadastro')}>
+                <Text style={styles.cadastroLink}> Cadastre-se aqui</Text>
+              </Pressable>
+            </View>
+          </BlurView>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f4f4', // cor de fundo
   },
-  containerCentered: { // Tela de carregamento
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  overlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f4f4',
+    paddingHorizontal: 20,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
+  loginBox: {
+    width: '90%',
+    maxWidth: 400,
     padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#333',
+    color: '#222',
+    marginBottom: 24,
   },
   input: {
-    height: 50,
-    borderColor: '#ff0000',
-    borderWidth: 2,
+    width: '100%',
+    height: 48,
+    backgroundColor: '#ffffffcc',
     borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 15,
+    paddingHorizontal: 12,
+    marginBottom: 16,
     fontSize: 16,
-    backgroundColor: '#fff',
-    color: '#a59898',
+    color: '#000',
   },
-  buttonContainer: {
-    marginTop: 10,
-    marginBottom: 20,
+  button: {
+    width: '100%',
+    height: 48,
+    backgroundColor: '#d10000',
     borderRadius: 8,
-    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
   },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  welcomeText: {
-    fontSize: 20,
-    textAlign: 'center',
-    marginBottom: 10,
-    color: '#28a745',
-  },
-  infoText: {
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#555',
+  },
+  cadastroContainer: {
+    flexDirection: 'row',
+    marginTop: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cadastroText: {
+    color: '#333',
+    fontSize: 15,
+  },
+  cadastroLink: {
+    color: '#d10000',
+    fontWeight: 'bold',
+    fontSize: 15,
+    textDecorationLine: 'underline',
+  },
+  erro: {
+    color: '#d10000',
+    fontWeight: 'bold',
+    marginBottom: 8,
+    fontSize: 15,
   },
 });
