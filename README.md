@@ -24,7 +24,6 @@ A autenticação é realizada com base em um arquivo usuarios.json, simulando um
 ## 📌 Observações:
 Este projeto é acadêmico e não utiliza banco de dados real.
 
-## ✨ Autores:
-Desenvolvido por: 
+## ✨ Desenvolvido por:
 - Raiany Mirella Miranda Oliveira
 - Vitor Hugo Camargo Senna
