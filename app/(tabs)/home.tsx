@@ -100,7 +100,6 @@ export default function Home() {
       <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />
       <View style={styles.container}>
         <View style={styles.topBar}>
-          <Text style={styles.titulo}>Livros por Assunto</Text>
           <TouchableOpacity
             style={styles.favButton}
             onPress={() => navigation.navigate('favoritos', { favoritos })}
@@ -208,7 +207,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginBottom: 10,
     marginTop: 10,
     paddingHorizontal: 8,
@@ -225,11 +224,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     flexDirection: 'row',
     alignItems: 'center',
+   
   },
   favButtonText: {
     color: '#a259f7',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    letterSpacing: 0.5,
+    textAlign: 'center',
   },
   buscaArea: {
     flexDirection: 'row',
@@ -248,8 +252,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 22,
-    height: 44,
+    paddingHorizontal: 5,
+    height: 40,
     elevation: 4,
     shadowColor: '#6c47ff',
     shadowOpacity: 0.18,
@@ -306,7 +310,7 @@ const styles = StyleSheet.create({
   },
   infoArea: {
     flex: 1,
-    padding: 12,
+    padding: 10,
     justifyContent: 'center',
   },
   nome: {
@@ -347,3 +351,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 });
+
+
+
+
+
+
+
+

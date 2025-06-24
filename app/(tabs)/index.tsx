@@ -12,7 +12,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { useNavigation } from '@react-navigation/native';
 
-// Importe o JSON de usuários
+// Importa o JSON de usuários
 import usuarios from '../../data/usuarios.json';
 
 const backgroundImage = require('../../assets/images/fundolivraria.png');
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   title: {
-    fontSize: 28,
+    fontSize: 27,
     fontWeight: 'bold',
     color: '#222',
     marginBottom: 24,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-    height: 48,
+    height: 44,
     backgroundColor: '#d10000',
     borderRadius: 8,
     justifyContent: 'center',
@@ -151,13 +151,14 @@ const styles = StyleSheet.create({
   },
   cadastroText: {
     color: '#333',
-    fontSize: 15,
+    fontSize: 12,
   },
   cadastroLink: {
     color: '#d10000',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 12,
     textDecorationLine: 'underline',
+    marginLeft: 10,
   },
   erro: {
     color: '#d10000',

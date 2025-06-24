@@ -43,7 +43,7 @@ export default function CadastroScreen() {
     Alert.alert('Cadastro realizado!', 'Agora você pode fazer login.', [
       { text: 'OK', onPress: () => navigation.navigate('Login') },
     ]);
-    // Aqui você pode implementar a lógica para salvar o novo usuário no JSON/localStorage/backend
+
   };
 
   return (
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#222',
     marginBottom: 24,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     height: 48,
-    backgroundColor: '#d10000', // mesma cor do botão de entrar
+    backgroundColor: '#d10000', 
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
